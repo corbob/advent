@@ -1,0 +1,441 @@
+#!markdown
+
+Select the day and part to load the input files.
+
+#!markdown
+
+# Helper functions/general setup
+
+#!csharp
+
+using System.IO;
+public static string[] GetDay(int day) {
+    return File.ReadAllLines($"input2015/{day}.txt");
+}
+string[] input;
+
+private string getMD5(string input)
+{
+    using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+    {
+        byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+        byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+        return Convert.ToHexString(hashBytes); // .NET 5 +
+    }
+}
+
+#!markdown
+
+# Day One:
+
+#!markdown
+
+## Description
+
+#!markdown
+
+### Part 1
+
+#!markdown
+
+Santa was hoping for a white Christmas, but his weather machine's "snow" function is powered by stars, and he's fresh out! To save Christmas, he needs you to collect fifty stars by December 25th.
+
+Collect stars by helping Santa solve puzzles. Two puzzles will be made available on each day in the Advent calendar; the second puzzle is unlocked when you complete the first. Each puzzle grants one star. Good luck!
+
+Here's an easy puzzle to warm you up.
+
+Santa is trying to deliver presents in a large apartment building, but he can't find the right floor - the directions he got are a little confusing. He starts on the ground floor (floor 0) and then follows the instructions one character at a time.
+
+An opening parenthesis, (, means he should go up one floor, and a closing parenthesis, ), means he should go down one floor.
+
+The apartment building is very tall, and the basement is very deep; he will never find the top or bottom floors.
+
+For example:
+
+- (()) and ()() both result in floor 0.
+- ((( and (()(()( both result in floor 3.
+- ))((((( also results in floor 3.
+- ()) and ))( both result in floor -1 (the first basement level).
+- ))) and )())()) both result in floor -3.
+
+To what floor do the instructions take Santa?
+
+#!markdown
+
+### Part 2
+
+#!markdown
+
+Now, given the same instructions, find the position of the first character that causes him to enter the basement (floor -1). The first character in the instructions has position 1, the second character has position 2, and so on.
+
+For example:
+
+- ) causes him to enter the basement at character position 1.
+- ()()) causes him to enter the basement at character position 5.
+
+What is the position of the character that causes Santa to first enter the basement?
+
+#!markdown
+
+## Code
+
+#!csharp
+
+input = GetDay(1);
+
+#!markdown
+
+### Part 1
+
+#!csharp
+
+int floor = 0;
+for (int i = 0; i < input[0].Length; i++)
+{
+    floor += input[0][i].Equals('(') ? 1 : -1;
+}
+Console.WriteLine(floor);
+
+#!markdown
+
+### Part 2
+
+#!csharp
+
+floor = 0;
+for (int i = 0; i < input[0].Length; i++)
+{
+    if (floor < 0)
+    {
+        Console.WriteLine(i);
+        break;
+    }
+    floor += input[0][i].Equals('(') ? 1 : -1;
+}
+
+#!markdown
+
+# Day Two:
+
+#!markdown
+
+## Description
+
+#!markdown
+
+### Part 1
+
+#!markdown
+
+The elves are running low on wrapping paper, and so they need to submit an order for more. They have a list of the dimensions (length `l`, width `w`, and height `h`) of each present, and only want to order exactly as much as they need.
+
+Fortunately, every present is a box (a perfect [right rectangular prism](https://en.wikipedia.org/wiki/Cuboid#Rectangular_cuboid)), which makes calculating the required wrapping paper for each gift a little easier: find the surface area of the box, which is `2*l*w + 2*w*h + 2*h*l`. The elves also need a little extra paper for each present: the area of the smallest side.
+
+For example:
+
+- A present with dimensions `2x3x4` requires `2*6 + 2*12 + 2*8 = 52` square feet of wrapping paper plus 6 square feet of slack, for a total of `58` square feet.
+- A present with dimensions `1x1x10` requires `2*1 + 2*10 + 2*10 = 42` square feet of wrapping paper plus 1 square foot of slack, for a total of `43` square feet.
+
+All numbers in the elves' list are in feet. How many total square feet of wrapping paper should they order?
+
+#!markdown
+
+### Part 2
+
+#!markdown
+
+## Code
+
+#!csharp
+
+input = GetDay(2);
+
+Console.Write("Part One: ");
+
+int total = 0;
+for (int i = 0; i < input.Length; i++)
+{
+    var temp = input[i].Split('x');
+    int height, width, depth = 0;
+    height = int.Parse(temp[0]);
+    width = int.Parse(temp[1]);
+    depth = int.Parse(temp[2]);
+    var front = width * height;
+    var top = width * depth;
+    var side = height * depth;
+    var surfaceArea = 2 * (front + top + side);
+    var min = Math.Min(Math.Min(front, top), Math.Min(side, top));
+    total += surfaceArea + min;
+}
+Console.WriteLine(total);
+
+Console.Write("Part Two: ");
+
+total = 0;
+for (int i = 0; i < input.Length; i++)
+{
+    var temp = input[i].Split('x');
+    int height, width, depth = 0;
+    height = int.Parse(temp[0]);
+    width = int.Parse(temp[1]);
+    depth = int.Parse(temp[2]);
+    var front = 2 * (width + height);
+    var top = 2 * (width + depth);
+    var side = 2 * (height + depth);
+    var min = Math.Min(Math.Min(front, top), Math.Min(side, top));
+    total += min + (height * width * depth);
+}
+Console.WriteLine(total);
+
+#!markdown
+
+# Day Three
+
+#!csharp
+
+input = GetDay(3);
+
+Console.WriteLine("Part One:");
+
+var houses = new Dictionary<string, int>();
+int x = 0, y = 0;
+
+if (houses.ContainsKey($"{x},{y}"))
+{
+    houses[$"{x},{y}"]++;
+}
+else
+{
+    houses.Add($"{x},{y}", 1);
+}
+
+for (int i = 0; i < input[0].Length; i++)
+{
+    switch (input[0][i])
+    {
+        case '^':
+            y--;
+            break;
+        case '>':
+            x++;
+            break;
+        case 'v':
+            y++;
+            break;
+        case '<':
+            x--;
+            break;
+        default:
+            throw new Exception("What the fuuuuuuu");
+    }
+
+    if (houses.ContainsKey($"{x},{y}"))
+    {
+        houses[$"{x},{y}"]++;
+    }
+    else
+    {
+        houses.Add($"{x},{y}", 1);
+    }
+}
+
+Console.WriteLine(houses.Count);
+
+Console.WriteLine("Part Two:");
+
+houses = new Dictionary<string, int>();
+x = 0;
+y = 0;
+int robox = 0;
+int roboy = 0;
+
+if (houses.ContainsKey($"{x},{y}"))
+{
+    houses[$"{x},{y}"]++;
+}
+else
+{
+    houses.Add($"{x},{y}", 1);
+}
+
+for (int i = 0; i < input[0].Length; i++)
+{
+    var isRobo = i % 2 == 0;
+    switch (input[0][i])
+    {
+        case '^':
+            if (isRobo)
+            {
+                roboy--;
+            }
+            else
+            {
+                y--;
+            }
+            break;
+        case '>':
+            if (isRobo)
+            {
+                robox++;
+            }
+            else
+            {
+                x++;
+            }
+            break;
+        case 'v':
+            if (isRobo)
+            {
+                roboy++;
+            }
+            else
+            {
+                y++;
+            }
+            break;
+        case '<':
+            if (isRobo)
+            {
+                robox--;
+            }
+            else
+            {
+                x--;
+            }
+            break;
+        default:
+            throw new Exception("What the fuuuuuuu");
+    }
+    var key = isRobo ? $"{robox},{roboy}" : $"{x},{y}";
+
+    if (houses.ContainsKey(key))
+    {
+        houses[key]++;
+    }
+    else
+    {
+        houses.Add(key, 1);
+    }
+}
+
+Console.WriteLine(houses.Count);
+
+#!markdown
+
+# Day Four
+
+#!csharp
+
+input = GetDay(4);
+
+Console.WriteLine("Part One:");
+
+int number = 1;
+string secret = input[0];
+while (getMD5($"{secret}{number}").Substring(0, 5) != "00000")
+{
+    number++;
+}
+
+Console.WriteLine(number);
+
+Console.WriteLine("Part Two:");
+
+number = 1;
+secret = input[0];
+while (getMD5($"{secret}{number}").Substring(0, 6) != "000000")
+{
+    number++;
+}
+
+Console.WriteLine(number);
+
+#!markdown
+
+# Day Five
+
+#!csharp
+
+private bool isNiceWord(string wordToCheck)
+{
+    var vowels = "aeiou";
+    string[] disallowedSubstrings = { "ab", "cd", "pq", "xy" };
+    
+    // It contains at least three vowels (aeiou only), like aei, xazegov, or aeiouaeiouaeiou.
+    int numVowels = wordToCheck.ToLowerInvariant().GroupBy(c => c).Select(c => new {Char = c.Key, Count = c.Count()}).Where(o => vowels.Contains(o.Char)).Sum(o => o.Count);
+
+    if (numVowels < 3) {
+        return false;
+    }
+
+    // It contains at least one letter that appears twice in a row, like xx, abcdde (dd), or aabbccdd (aa, bb, cc, or dd).
+    bool hasDoubleLetters = false;
+
+    for (int i = 1 ; i < wordToCheck.Length ; i++)
+    {
+        if (wordToCheck[i].Equals(wordToCheck[i-1])) {
+            hasDoubleLetters = true;
+            break;
+        }
+    }
+
+    if (!hasDoubleLetters)
+    {
+        return false;
+    }
+
+    // It does not contain the strings ab, cd, pq, or xy, even if they are part of one of the other requirements.
+    foreach (var badSubstring in disallowedSubstrings)
+    {
+        if (wordToCheck.Contains(badSubstring))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+private bool isActuallyNiceWord(string wordToCheck)
+{
+    return false;
+}
+
+#!csharp
+
+input = GetDay(5);
+
+Console.Write("Part One: ");
+
+int numberNiceWords = 0;
+
+foreach (var word in input)
+{
+    numberNiceWords += isNiceWord(word) ? 1 : 0;
+}
+
+Console.WriteLine(numberNiceWords);
+
+Console.Write("Part Two: ");
+
+numberNiceWords = 0;
+
+foreach (var word in input)
+{
+    numberNiceWords += isActuallyNiceWord(word) ? 1 : 0;
+}
+
+Console.WriteLine(numberNiceWords);
+
+#!markdown
+
+# Day Six
+
+#!csharp
+
+input = GetDay(6);
+
+Console.WriteLine("Part One:");
+
+Console.WriteLine("Part Two:");
